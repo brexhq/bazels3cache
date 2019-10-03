@@ -20,7 +20,7 @@ function fatalError(error: string) {
 
 function daemonMain(args: Args, onDoneInitializing: () => void) {
     process.on("uncaughtException", function (err) {
-        fatalError(""+err);
+        fatalError("" + err);
         process.exit(1); // hard stop; can't rely on just process.exitCode
     });
 
@@ -55,7 +55,7 @@ function daemonMain(args: Args, onDoneInitializing: () => void) {
             }
         })
         .catch(err => {
-            const message = err.message || ""+err;
+            const message = err.message || "" + err;
             fatalError(message);
         })
 }
@@ -86,8 +86,6 @@ function main(args: string[]) {
 
         child.on("message", msg => {
             if (msg === DONE_INITIALIZING) {
-                child.unref(); // don't wait for the child process to terminate
-                child.disconnect(); // don't wait on the ipc channel any more
                 process.exitCode = 0; // now we can exit cleanly
             }
         });
