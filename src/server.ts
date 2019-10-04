@@ -43,7 +43,7 @@ function logProps(
         attrs.isBlockedGccDepfile && "(blocked gcc depfile)"
     ]
     const logline = loglineItems
-        .filter(item => ["string","number"].indexOf(typeof item) !== -1)
+        .filter(item => ["string", "number"].indexOf(typeof item) !== -1)
         .join(" ");
     debug(logline);
     winston.info(logline);
@@ -117,7 +117,7 @@ function pathToUploadCache(s3key: string, config: Config) {
     return path.join(config.asyncUpload.cacheDir, s3key);
 }
 
-export function startServer(s3: AWS.S3, config: Config, onDoneInitializing: () => void) {
+export function startServer(s3: AWS.S3, config: Config) {
     const cache = new Cache(config); // in-memory cache
     let idleTimer: NodeJS.Timer;
     let awsPauseTimer: NodeJS.Timer;
@@ -186,7 +186,7 @@ export function startServer(s3: AWS.S3, config: Config, onDoneInitializing: () =
             // Oh well, we can't wait forever bail out on this request and close the socket
             winston.warn("Socket timeout reached. Returning NotFound");
             res.statusCode = StatusCode.NotFound;
-            sendResponse(req, res, null, {startTime, awsPaused });
+            sendResponse(req, res, null, { startTime, awsPaused });
         });
 
         if (idleTimer) {
@@ -221,8 +221,8 @@ export function startServer(s3: AWS.S3, config: Config, onDoneInitializing: () =
                     sendResponse(req, res, null, { startTime, awsPaused });
                 } else {
                     const s3request = s3.getObject({
-                         Bucket: config.bucket,
-                         Key: s3key
+                        Bucket: config.bucket,
+                        Key: s3key
                     }).promise();
 
                     s3request
@@ -350,8 +350,8 @@ export function startServer(s3: AWS.S3, config: Config, onDoneInitializing: () =
                     sendResponse(req, res, null, { startTime, awsPaused });
                 } else {
                     const s3request = s3.headObject({
-                         Bucket: config.bucket,
-                         Key: s3key
+                        Bucket: config.bucket,
+                        Key: s3key
                     }).promise();
 
                     s3request
@@ -402,7 +402,7 @@ export function startServer(s3: AWS.S3, config: Config, onDoneInitializing: () =
         const message = `could not start server: ${e.message}`;
         winston.error(message);
         console.error(`bazels3cache: ${message}`);
-        process.exitCode = 1;
+        process.exit(1);
     });
 
     server.listen(config.port, config.host, () => {
@@ -410,6 +410,5 @@ export function startServer(s3: AWS.S3, config: Config, onDoneInitializing: () =
         debug(`started server at http://${config.host}:${config.port}/`);
         winston.info(`started server at http://${config.host}:${config.port}/`);
         console.log(`bazels3cache: started server at http://${config.host}:${config.port}/, logging to ${logfile}`);
-        onDoneInitializing();
     });
 }
